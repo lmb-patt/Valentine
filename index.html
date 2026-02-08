@@ -978,11 +978,15 @@
   });
 
   // === SCREEN 3: Celebration ===
+  var confettiRunning = false;
+
   function launchConfetti() {
-    var end = Date.now() + CONFETTI_DURATION;
+    confettiRunning = true;
     var heartShape = confetti.shapeFromText({ text: '❤️', scalar: 2 });
 
     (function frame() {
+      if (!confettiRunning) return;
+
       confetti({
         particleCount: 3,
         angle: 60,
@@ -1007,10 +1011,13 @@
         colors: ['#e91e90', '#ff6b9d', '#ff1744', '#f50057', '#ff4081']
       });
 
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
+      requestAnimationFrame(frame);
     })();
+  }
+
+  function stopConfetti() {
+    confettiRunning = false;
+    confetti.reset();
   }
 
   // === SCREEN 4: Restaurant Selection ===
@@ -1018,6 +1025,7 @@
   var restaurantConfirmation = document.getElementById('restaurantConfirmation');
 
   dateBtn.addEventListener('click', function() {
+    stopConfetti();
     showScreen(screen4);
   });
 
@@ -1027,17 +1035,6 @@
       var subject = encodeURIComponent("Valentine's Date 💕");
       var body = encodeURIComponent('Ich wähle: ' + name + '! 💕');
       window.location.href = 'mailto:leon.brunner@patterno.de?subject=' + subject + '&body=' + body;
-
-      // Brief confetti burst
-      var heartShape = confetti.shapeFromText({ text: '❤️', scalar: 2 });
-      confetti({
-        particleCount: 80,
-        spread: 100,
-        origin: { y: 0.6 },
-        shapes: [heartShape],
-        scalar: 1.5,
-        colors: ['#e91e90', '#ff6b9d', '#ff1744', '#f50057', '#ff4081']
-      });
 
       restaurantConfirmation.textContent = name + ' — great choice! 💕';
       restaurantConfirmation.classList.add('show');
