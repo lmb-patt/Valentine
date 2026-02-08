@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Security Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: flex; }
+
+  /* ===== SCREEN 0: ENVELOPE ===== */
+  #screen0 {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0, #f48fb1);
+  }
+
+  .envelope-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .envelope {
+    position: relative;
+    width: 300px;
+    height: 190px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    perspective: 800px;
+  }
+
+  .envelope-body {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .envelope-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(to bottom right, rgba(0,0,0,0.025) 49.5%, transparent 50.5%),
+      linear-gradient(to bottom left, rgba(0,0,0,0.025) 49.5%, transparent 50.5%);
+    pointer-events: none;
+  }
+
+  .envelope-address {
+    text-align: center;
+    z-index: 1;
+  }
+
+  .address-name {
+    display: block;
+    font-family: 'Dancing Script', cursive;
+    font-size: 28px;
+    font-weight: 700;
+    color: #e91e90;
+  }
+
+  .address-co {
+    display: block;
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .envelope-seal {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+    z-index: 3;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+  }
+
+  .letter {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    width: 260px;
+    background: #fff;
+    border: 2px solid #f8bbd0;
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.6s ease 0.3s, opacity 0.4s ease 0.3s;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  }
+
+  .envelope.opened .envelope-body {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .envelope.opened .letter {
+    transform: translateX(-50%) translateY(-5px);
+    opacity: 1;
+    z-index: 6;
+    pointer-events: auto;
+  }
+
+  .letter-text {
+    font-family: 'Dancing Script', cursive;
+    font-size: 30px;
+    font-weight: 700;
+    color: #e91e90;
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
+
+  .letter-yes-btn {
+    background: linear-gradient(135deg, #e91e90, #ff6b9d);
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 36px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 3px 12px rgba(233, 30, 144, 0.3);
+    min-height: 44px;
+  }
+
+  .letter-yes-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 16px rgba(233, 30, 144, 0.4);
+  }
+
+  .letter-yes-btn:active {
+    transform: scale(0.98);
+  }
+
+  .open-hint {
+    margin-top: 24px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.8);
+    animation: pulse 2s ease-in-out infinite;
+    transition: opacity 0.3s;
+  }
+
+  .envelope.opened ~ .open-hint {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  /* ===== SCREEN 1: FAKE RECAPTCHA CHECKBOX ===== */
+  #screen1 {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+  }
+
+  .verify-wrapper {
+    background: #fff;
+    border: 1px solid #d3d3d3;
+    border-radius: 8px;
+    padding: 24px 20px 20px;
+    max-width: 340px;
+    width: 100%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .verify-title {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 16px;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .recaptcha-box {
+    background: #f9f9f9;
+    border: 2px solid #d3d3d3;
+    border-radius: 3px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .recaptcha-box:hover { border-color: #bbb; }
+
+  .recaptcha-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .checkbox-area {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #c1c1c1;
+    border-radius: 3px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .checkbox-area .spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #4285f4;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .checkbox-area .checkmark {
+    display: none;
+    color: #4285f4;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .checkbox-area.loading .spinner { display: block; }
+  .checkbox-area.loading { border-color: transparent; }
+  .checkbox-area.checked .checkmark { display: block; }
+  .checkbox-area.checked { border-color: transparent; }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .not-robot-text {
+    font-size: 14px;
+    color: #555;
+    font-weight: 400;
+  }
+
+  .recaptcha-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .recaptcha-logo svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .recaptcha-logo span {
+    font-size: 7px;
+    color: #555;
+    letter-spacing: 0.5px;
+  }
+
+  .recaptcha-logo .privacy-terms {
+    font-size: 7px;
+    color: #888;
+  }
+
+  .verify-footer {
+    margin-top: 12px;
+    font-size: 11px;
+    color: #aaa;
+    text-align: center;
+  }
+
+  /* ===== SCREEN 2: IMAGE GRID ===== */
+  #screen2 {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px;
+  }
+
+  .captcha-modal {
+    background: #fff;
+    border-radius: 3px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    max-width: 320px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .captcha-header {
+    background: linear-gradient(135deg, #e91e90, #ff6b9d);
+    color: #fff;
+    padding: 20px 16px 14px;
+  }
+
+  .captcha-header-title {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+
+  .captcha-header-title strong {
+    font-weight: 700;
+    font-size: 24px;
+  }
+
+  .captcha-header-sub {
+    font-size: 13px;
+    opacity: 0.85;
+  }
+
+  .captcha-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    padding: 3px;
+    background: #fff;
+  }
+
+  .captcha-cell {
+    position: relative;
+    aspect-ratio: 1;
+    cursor: pointer;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .captcha-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.2s;
+  }
+
+  .captcha-cell.selected img {
+    transform: scale(0.85);
+    border-radius: 8px;
+  }
+
+  .captcha-cell .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(233, 30, 144, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .captcha-cell.selected .overlay {
+    opacity: 1;
+  }
+
+  .overlay .heart-icon {
+    font-size: 36px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    animation: heartPop 0.3s ease-out;
+  }
+
+  @keyframes heartPop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+
+  .captcha-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-top: 1px solid #eee;
+  }
+
+  .captcha-footer-icons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .captcha-footer-icons button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #999;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .verify-btn {
+    background: linear-gradient(135deg, #e91e90, #ff6b9d);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s;
+    min-height: 44px;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  .verify-btn:hover { opacity: 0.9; }
+  .verify-btn:active { opacity: 0.8; }
+
+  .error-msg {
+    color: #e91e90;
+    font-size: 13px;
+    text-align: center;
+    padding: 8px;
+    display: none;
+    font-weight: 500;
+  }
+
+  .error-msg.show { display: block; }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-8px); }
+    30% { transform: translateX(8px); }
+    45% { transform: translateX(-6px); }
+    60% { transform: translateX(6px); }
+    75% { transform: translateX(-3px); }
+    90% { transform: translateX(3px); }
+  }
+
+  .captcha-modal.shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  /* Success checkmark in captcha */
+  .success-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.92);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .success-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .success-check {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #34a853;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: scaleIn 0.4s ease-out;
+  }
+
+  .success-check svg {
+    width: 32px;
+    height: 32px;
+    fill: #fff;
+  }
+
+  .success-text {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #34a853;
+    font-weight: 500;
+  }
+
+  @keyframes scaleIn {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  /* ===== SCREEN 3: VALENTINE CELEBRATION ===== */
+  #screen3 {
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    z-index: 100;
+  }
+
+  .valentine-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('images/valentine-bg.jpeg');
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+  }
+
+  .valentine-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .valentine-content {
+    position: relative;
+    z-index: 1;
+    max-width: 500px;
+  }
+
+  .valentine-title {
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(42px, 10vw, 72px);
+    color: #fff;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.4);
+    margin-bottom: 20px;
+    line-height: 1.2;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .valentine-message {
+    font-size: clamp(19px, 4.5vw, 24px);
+    color: rgba(255,255,255,0.95);
+    line-height: 1.6;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    animation: fadeInUp 0.8s ease-out 0.3s both;
+  }
+
+  .date-btn {
+    background: linear-gradient(135deg, #e91e90, #ff6b9d);
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    padding: 14px 40px;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 3px 12px rgba(233, 30, 144, 0.3);
+    min-height: 44px;
+    margin-top: 28px;
+    animation: fadeInUp 0.8s ease-out 0.8s both;
+  }
+
+  .date-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 16px rgba(233, 30, 144, 0.4);
+  }
+
+  .date-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* ===== SCREEN 4: RESTAURANT SELECTION ===== */
+  #screen4 {
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    z-index: 100;
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0, #f48fb1);
+  }
+
+  .restaurant-title {
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(36px, 9vw, 60px);
+    color: #e91e90;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 32px;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .restaurant-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .restaurant-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeInUp 0.6s ease-out both;
+  }
+
+  .restaurant-card:nth-child(1) { animation-delay: 0.2s; }
+  .restaurant-card:nth-child(2) { animation-delay: 0.4s; }
+  .restaurant-card:nth-child(3) { animation-delay: 0.6s; }
+
+  .restaurant-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+  }
+
+  .restaurant-name {
+    font-family: 'Dancing Script', cursive;
+    font-size: 26px;
+    font-weight: 700;
+    color: #e91e90;
+    margin-bottom: 8px;
+  }
+
+  .restaurant-map-link {
+    display: inline-block;
+    font-size: 14px;
+    color: #ff6b9d;
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color 0.2s;
+  }
+
+  .restaurant-map-link:hover {
+    color: #e91e90;
+    text-decoration: underline;
+  }
+
+  .restaurant-choose-btn {
+    background: linear-gradient(135deg, #e91e90, #ff6b9d);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 32px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 3px 10px rgba(233, 30, 144, 0.25);
+    min-height: 44px;
+  }
+
+  .restaurant-choose-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 14px rgba(233, 30, 144, 0.35);
+  }
+
+  .restaurant-choose-btn:active {
+    transform: scale(0.98);
+  }
+
+  .restaurant-confirmation {
+    margin-top: 24px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 22px;
+    color: #e91e90;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .restaurant-confirmation.show {
+    opacity: 1;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== SCREEN 0: Envelope ===== -->
+<div id="screen0" class="screen active">
+  <div class="envelope-wrapper">
+    <div class="envelope" id="envelope">
+      <div class="envelope-body">
+        <div class="envelope-seal">❤️</div>
+        <div class="envelope-address">
+          <span class="address-name">Anastasia Otto</span>
+          <span class="address-co">c/o wifey</span>
+        </div>
+      </div>
+      <div class="letter" id="letter">
+        <div class="letter-text">Will you be my Valentine?</div>
+        <button class="letter-yes-btn" id="letterYesBtn">Yes! 💕</button>
+        <div style="margin-top: 12px; font-size: 12px; color: #ccc; font-style: italic;">Spoiler: there's no "No" button ;))</div>
+      </div>
+    </div>
+    <div class="open-hint">Tap to open</div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 1: Fake reCAPTCHA Checkbox ===== -->
+<div id="screen1" class="screen">
+  <div class="verify-wrapper">
+    <div class="verify-title">Verify to continue</div>
+    <div class="recaptcha-box" id="recaptchaBox" role="button" tabindex="0">
+      <div class="recaptcha-left">
+        <div class="checkbox-area" id="checkboxArea">
+          <div class="spinner"></div>
+          <div class="checkmark">✓</div>
+        </div>
+        <span class="not-robot-text">I'm not a robot</span>
+      </div>
+      <div class="recaptcha-logo">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 2a30 30 0 1 0 0 60 30 30 0 0 0 0-60z" fill="none"/>
+          <path d="M32 12.8c-2.3 0-4.5.4-6.6 1.2l7.6 6.4H42c.2 0 .3.1.3.3v8.9l6.4 5.4c.2-1.1.3-2.2.3-3.3A17 17 0 0 0 32 12.8z" fill="#1c3aa9"/>
+          <path d="M32 48.2c-2.5 0-5-.6-7.2-1.7l-6.3 6.3A27.2 27.2 0 0 0 32 57c5 0 9.7-1.4 13.8-3.8l-6.3-6.3c-2.3 1-4.8 1.3-7.5 1.3z" fill="#4285f4"/>
+          <path d="M15 32c0-2.5.6-5 1.6-7.2l-6.3-6.3A27 27 0 0 0 7 32c0 5.1 1.4 9.8 3.8 13.8l6.3-6.3c-1.3-2.3-2.1-4.8-2.1-7.5z" fill="#ababab"/>
+          <path d="M42.2 22.4H33l-1 .1-6.6-5.5A17 17 0 0 0 15 32c0 2.5.5 4.8 1.5 7l9.2-9.2c-.1-.6-.2-1.2-.2-1.8a6.5 6.5 0 0 1 6.5-6.5h3.7l6.5-5.5v6.4z" fill="#2d9248"/>
+          <path d="M32 38.5a6.5 6.5 0 0 1-6.4-5.6l-9.2 9.2c2.8 4.6 7.4 8 12.8 9.2V38.5z" fill="#2d9248"/>
+        </svg>
+        <span>reCAPTCHA</span>
+        <span class="privacy-terms">Privacy - Terms</span>
+      </div>
+    </div>
+    <div class="verify-footer">This helps us prevent automated access.</div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 2: Image Grid ===== -->
+<div id="screen2" class="screen">
+  <div class="captcha-modal" id="captchaModal">
+    <div class="captcha-header">
+      <div class="captcha-header-title">Select all images with<br><strong>your Valentine</strong></div>
+      <div class="captcha-header-sub">Click verify once there are none left.</div>
+    </div>
+    <div class="captcha-grid" id="captchaGrid"></div>
+    <div class="error-msg" id="errorMsg">Please try again 💕</div>
+    <div class="captcha-footer">
+      <div class="captcha-footer-icons">
+        <button aria-label="Reload">↻</button>
+        <button aria-label="Audio">♫</button>
+        <button aria-label="Info">ⓘ</button>
+      </div>
+      <button class="verify-btn" id="verifyBtn">Verify</button>
+    </div>
+    <div class="success-overlay" id="successOverlay">
+      <div class="success-check">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      </div>
+      <div class="success-text">Verification complete!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 3: Valentine Celebration ===== -->
+<div id="screen3" class="screen">
+  <div class="valentine-bg"></div>
+  <div class="valentine-content">
+    <div class="valentine-title">Happy Valentine's Day Hasi! 💕</div>
+    <div class="valentine-message">
+      Verification complete: Turns out every picture of me is a picture of someone who's crazy about you.
+    </div>
+    <button class="date-btn" id="dateBtn">Pick our date spot 💌</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN 4: Restaurant Selection ===== -->
+<div id="screen4" class="screen">
+  <div class="restaurant-title">Where should we go?</div>
+  <div class="restaurant-cards">
+    <div class="restaurant-card">
+      <div class="restaurant-name">Le Chaudron</div>
+      <a class="restaurant-map-link" href="https://maps.app.goo.gl/E2FsE39BmqQeAy9z6" target="_blank" rel="noopener">📍 View on Google Maps</a>
+      <br>
+      <button class="restaurant-choose-btn" data-restaurant="Le Chaudron">Choose 💕</button>
+    </div>
+    <div class="restaurant-card">
+      <div class="restaurant-name">Le Cafe Brun</div>
+      <a class="restaurant-map-link" href="https://maps.app.goo.gl/kXDFWMRhCXeRSnyR9" target="_blank" rel="noopener">📍 View on Google Maps</a>
+      <br>
+      <button class="restaurant-choose-btn" data-restaurant="Le Cafe Brun">Choose 💕</button>
+    </div>
+    <div class="restaurant-card">
+      <div class="restaurant-name">Brulot</div>
+      <a class="restaurant-map-link" href="https://maps.app.goo.gl/Nkqg7C9zeJUnSk1f6" target="_blank" rel="noopener">📍 View on Google Maps</a>
+      <br>
+      <button class="restaurant-choose-btn" data-restaurant="Brulot">Choose 💕</button>
+    </div>
+  </div>
+  <div class="restaurant-confirmation" id="restaurantConfirmation"></div>
+</div>
+
+<script>
+(function() {
+  // === CONFIG ===
+  const TOTAL_IMAGES = 9;
+  const SPINNER_DELAY = 1200;
+  const SUCCESS_DELAY = 1500;
+  const CONFETTI_DURATION = 50000;
+  const IMAGE_EXT = {1:'jpg',2:'jpg',3:'jpeg',4:'jpeg',5:'jpg',6:'jpg',7:'jpg',8:'jpg',9:'jpg'};
+
+  // === ELEMENTS ===
+  const screen0 = document.getElementById('screen0');
+  const screen1 = document.getElementById('screen1');
+  const screen2 = document.getElementById('screen2');
+  const screen3 = document.getElementById('screen3');
+  const screen4 = document.getElementById('screen4');
+  const recaptchaBox = document.getElementById('recaptchaBox');
+  const checkboxArea = document.getElementById('checkboxArea');
+  const captchaGrid = document.getElementById('captchaGrid');
+  const captchaModal = document.getElementById('captchaModal');
+  const verifyBtn = document.getElementById('verifyBtn');
+  const errorMsg = document.getElementById('errorMsg');
+  const successOverlay = document.getElementById('successOverlay');
+
+  // === SCREEN 0: Envelope Logic ===
+  const envelope = document.getElementById('envelope');
+  const letterYesBtn = document.getElementById('letterYesBtn');
+
+  envelope.addEventListener('click', function() {
+    if (!envelope.classList.contains('opened')) {
+      envelope.classList.add('opened');
+    }
+  });
+
+  letterYesBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    showScreen(screen1);
+  });
+
+  // === SCREEN 1: Checkbox Logic ===
+  recaptchaBox.addEventListener('click', handleCheckboxClick);
+  recaptchaBox.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCheckboxClick();
+    }
+  });
+
+  function handleCheckboxClick() {
+    if (checkboxArea.classList.contains('loading') || checkboxArea.classList.contains('checked')) return;
+    checkboxArea.classList.add('loading');
+
+    setTimeout(function() {
+      checkboxArea.classList.remove('loading');
+      checkboxArea.classList.add('checked');
+
+      setTimeout(function() {
+        showScreen(screen2);
+        buildGrid();
+      }, 400);
+    }, SPINNER_DELAY);
+  }
+
+  // === SCREEN 2: Image Grid ===
+  const selected = new Set();
+
+  function fisherYatesShuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildGrid() {
+    captchaGrid.innerHTML = '';
+    selected.clear();
+
+    const indices = fisherYatesShuffle(
+      Array.from({ length: TOTAL_IMAGES }, function(_, i) { return i + 1; })
+    );
+
+    indices.forEach(function(idx) {
+      const cell = document.createElement('div');
+      cell.className = 'captcha-cell';
+      cell.dataset.index = idx;
+
+      const img = document.createElement('img');
+      img.src = 'images/valentine' + idx + '.' + IMAGE_EXT[idx];
+      img.alt = 'Image ' + idx;
+      img.draggable = false;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.innerHTML = '<span class="heart-icon">❤️</span>';
+
+      cell.appendChild(img);
+      cell.appendChild(overlay);
+
+      cell.addEventListener('click', function() {
+        toggleCell(cell, idx);
+      });
+
+      captchaGrid.appendChild(cell);
+    });
+  }
+
+  function toggleCell(cell, idx) {
+    if (selected.has(idx)) {
+      selected.delete(idx);
+      cell.classList.remove('selected');
+    } else {
+      selected.add(idx);
+      cell.classList.add('selected');
+    }
+    errorMsg.classList.remove('show');
+  }
+
+  verifyBtn.addEventListener('click', function() {
+    if (selected.size === TOTAL_IMAGES) {
+      // Success!
+      successOverlay.classList.add('show');
+      setTimeout(function() {
+        showScreen(screen3);
+        launchConfetti();
+      }, SUCCESS_DELAY);
+    } else {
+      // Not all selected
+      errorMsg.classList.add('show');
+      captchaModal.classList.add('shake');
+      setTimeout(function() {
+        captchaModal.classList.remove('shake');
+      }, 500);
+    }
+  });
+
+  // === SCREEN 3: Celebration ===
+  function launchConfetti() {
+    var end = Date.now() + CONFETTI_DURATION;
+    var heartShape = confetti.shapeFromText({ text: '❤️', scalar: 2 });
+
+    (function frame() {
+      confetti({
+        particleCount: 3,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.6 },
+        shapes: [heartShape],
+        scalar: 1.5,
+        drift: 0.5,
+        ticks: 200,
+        colors: ['#e91e90', '#ff6b9d', '#ff1744', '#f50057', '#ff4081']
+      });
+
+      confetti({
+        particleCount: 3,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.6 },
+        shapes: [heartShape],
+        scalar: 1.5,
+        drift: -0.5,
+        ticks: 200,
+        colors: ['#e91e90', '#ff6b9d', '#ff1744', '#f50057', '#ff4081']
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    })();
+  }
+
+  // === SCREEN 4: Restaurant Selection ===
+  var dateBtn = document.getElementById('dateBtn');
+  var restaurantConfirmation = document.getElementById('restaurantConfirmation');
+
+  dateBtn.addEventListener('click', function() {
+    showScreen(screen4);
+  });
+
+  document.querySelectorAll('.restaurant-choose-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var name = btn.dataset.restaurant;
+      var subject = encodeURIComponent("Valentine's Date 💕");
+      var body = encodeURIComponent('Ich wähle: ' + name + '! 💕');
+      window.location.href = 'mailto:leon.brunner@patterno.de?subject=' + subject + '&body=' + body;
+
+      // Brief confetti burst
+      var heartShape = confetti.shapeFromText({ text: '❤️', scalar: 2 });
+      confetti({
+        particleCount: 80,
+        spread: 100,
+        origin: { y: 0.6 },
+        shapes: [heartShape],
+        scalar: 1.5,
+        colors: ['#e91e90', '#ff6b9d', '#ff1744', '#f50057', '#ff4081']
+      });
+
+      restaurantConfirmation.textContent = name + ' — great choice! 💕';
+      restaurantConfirmation.classList.add('show');
+    });
+  });
+
+  // === UTILS ===
+  function showScreen(target) {
+    document.querySelectorAll('.screen').forEach(function(s) {
+      s.classList.remove('active');
+    });
+    target.classList.add('active');
+  }
+})();
+</script>
+</body>
+</html>
