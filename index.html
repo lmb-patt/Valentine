@@ -606,7 +606,7 @@
     transform: scale(0.98);
   }
 
-  /* ===== SCREEN 4: RESTAURANT SELECTION ===== */
+  /* ===== SCREEN 4: RESTAURANT REVEAL ===== */
   #screen4 {
     position: fixed;
     inset: 0;
@@ -628,46 +628,27 @@
     animation: fadeInUp 0.8s ease-out;
   }
 
-  .restaurant-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    width: 100%;
-    max-width: 360px;
-  }
-
   .restaurant-card {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    padding: 20px;
-    transition: transform 0.2s, box-shadow 0.2s;
-    animation: fadeInUp 0.6s ease-out both;
-  }
-
-  .restaurant-card:nth-child(1) { animation-delay: 0.2s; }
-  .restaurant-card:nth-child(2) { animation-delay: 0.4s; }
-  .restaurant-card:nth-child(3) { animation-delay: 0.6s; }
-
-  .restaurant-card:hover {
-    transform: scale(1.03);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+    padding: 24px 32px;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
   }
 
   .restaurant-name {
     font-family: 'Dancing Script', cursive;
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 700;
     color: #e91e90;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   .restaurant-map-link {
     display: inline-block;
-    font-size: 14px;
+    font-size: 15px;
     color: #ff6b9d;
     text-decoration: none;
-    margin-bottom: 14px;
     transition: color 0.2s;
   }
 
@@ -676,41 +657,31 @@
     text-decoration: underline;
   }
 
-  .restaurant-choose-btn {
-    background: linear-gradient(135deg, #e91e90, #ff6b9d);
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    padding: 10px 32px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'Roboto', sans-serif;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 3px 10px rgba(233, 30, 144, 0.25);
-    min-height: 44px;
+  .bouquet {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 36px auto 0;
+    animation: rotateBouquet 20s linear infinite, fadeInUp 0.8s ease-out 0.6s both;
   }
 
-  .restaurant-choose-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 14px rgba(233, 30, 144, 0.35);
+  .bouquet span {
+    position: absolute;
+    font-size: 32px;
+    top: 50%;
+    left: 50%;
   }
 
-  .restaurant-choose-btn:active {
-    transform: scale(0.98);
-  }
+  .bouquet span:nth-child(1) { transform: translate(-50%,-50%) rotate(0deg) translateY(-55px); }
+  .bouquet span:nth-child(2) { transform: translate(-50%,-50%) rotate(60deg) translateY(-55px); }
+  .bouquet span:nth-child(3) { transform: translate(-50%,-50%) rotate(120deg) translateY(-55px); }
+  .bouquet span:nth-child(4) { transform: translate(-50%,-50%) rotate(180deg) translateY(-55px); }
+  .bouquet span:nth-child(5) { transform: translate(-50%,-50%) rotate(240deg) translateY(-55px); }
+  .bouquet span:nth-child(6) { transform: translate(-50%,-50%) rotate(300deg) translateY(-55px); }
+  .bouquet span:nth-child(7) { transform: translate(-50%,-50%); font-size: 44px; }
 
-  .restaurant-confirmation {
-    margin-top: 24px;
-    font-family: 'Dancing Script', cursive;
-    font-size: 22px;
-    color: #e91e90;
-    opacity: 0;
-    transition: opacity 0.4s;
-  }
-
-  .restaurant-confirmation.show {
-    opacity: 1;
+  @keyframes rotateBouquet {
+    to { transform: rotate(360deg); }
   }
 
   @keyframes fadeInUp {
@@ -811,34 +782,22 @@
     <div class="valentine-message">
       Verification complete: Turns out every picture of me is a picture of someone who's crazy about you.
     </div>
-    <button class="date-btn" id="dateBtn">Pick our date spot 💌</button>
+    <button class="date-btn" id="dateBtn">Our Date Night 💌</button>
   </div>
 </div>
 
-<!-- ===== SCREEN 4: Restaurant Selection ===== -->
+<!-- ===== SCREEN 4: Restaurant Reveal ===== -->
 <div id="screen4" class="screen">
-  <div class="restaurant-title">Where should we go?</div>
-  <div class="restaurant-cards">
-    <div class="restaurant-card">
-      <div class="restaurant-name">Le Chaudron</div>
-      <a class="restaurant-map-link" href="https://maps.app.goo.gl/E2FsE39BmqQeAy9z6" target="_blank" rel="noopener">📍 View on Google Maps</a>
-      <br>
-      <button class="restaurant-choose-btn" data-restaurant="Le Chaudron">Choose 💕</button>
-    </div>
-    <div class="restaurant-card">
-      <div class="restaurant-name">Le Cafe Brun</div>
-      <a class="restaurant-map-link" href="https://maps.app.goo.gl/kXDFWMRhCXeRSnyR9" target="_blank" rel="noopener">📍 View on Google Maps</a>
-      <br>
-      <button class="restaurant-choose-btn" data-restaurant="Le Cafe Brun">Choose 💕</button>
-    </div>
-    <div class="restaurant-card">
-      <div class="restaurant-name">Brulot</div>
-      <a class="restaurant-map-link" href="https://maps.app.goo.gl/Nkqg7C9zeJUnSk1f6" target="_blank" rel="noopener">📍 View on Google Maps</a>
-      <br>
-      <button class="restaurant-choose-btn" data-restaurant="Brulot">Choose 💕</button>
-    </div>
+  <div class="restaurant-title">Our Date Night 💕</div>
+  <div class="restaurant-card">
+    <div class="restaurant-name">Crêperie du Port</div>
+    <a class="restaurant-map-link" href="https://maps.app.goo.gl/3ck4cSWhzD9TWfq46" target="_blank" rel="noopener">📍 View on Google Maps</a>
   </div>
-  <div class="restaurant-confirmation" id="restaurantConfirmation"></div>
+  <div class="bouquet">
+    <span>🌸</span><span>🌸</span><span>🌸</span>
+    <span>🌸</span><span>🌸</span><span>🌸</span>
+    <span>🌺</span>
+  </div>
 </div>
 
 <script>
@@ -1020,25 +979,12 @@
     confetti.reset();
   }
 
-  // === SCREEN 4: Restaurant Selection ===
+  // === SCREEN 4: Restaurant Reveal ===
   var dateBtn = document.getElementById('dateBtn');
-  var restaurantConfirmation = document.getElementById('restaurantConfirmation');
 
   dateBtn.addEventListener('click', function() {
     stopConfetti();
     showScreen(screen4);
-  });
-
-  document.querySelectorAll('.restaurant-choose-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var name = btn.dataset.restaurant;
-      var subject = encodeURIComponent("Valentine's Date 💕");
-      var body = encodeURIComponent('Ich wähle: ' + name + '! 💕');
-      window.location.href = 'mailto:leon.brunner@patterno.de?subject=' + subject + '&body=' + body;
-
-      restaurantConfirmation.textContent = name + ' — great choice! 💕';
-      restaurantConfirmation.classList.add('show');
-    });
   });
 
   // === UTILS ===
